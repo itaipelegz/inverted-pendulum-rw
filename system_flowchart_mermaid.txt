@@ -1,0 +1,131 @@
+%% Color code: 24V=orange, 5V=red, GND=black, Signals=blue
+flowchart TB
+
+%% =====================
+%% Style Definitions (Nodes)
+%% =====================
+classDef pwr24 fill:#fff3cd,stroke:#ff9800,stroke-width:2
+classDef pwr5  fill:#fdecea,stroke:#f44336,stroke-width:2
+classDef gnd   fill:#eeeeee,stroke:#000000,stroke-width:2
+classDef ctrl  fill:#e3f2fd,stroke:#2196f3,stroke-width:2
+classDef drv   fill:#f3e5f5,stroke:#9c27b0,stroke-width:2
+classDef sens  fill:#e8f5e9,stroke:#4caf50,stroke-width:2
+classDef act   fill:#fffde7,stroke:#fbc02d,stroke-width:2
+
+%% =====================
+%% Power Source
+%% =====================
+PSU["External PSU<br/>24V"]:::pwr24
+BUS24[(+24V BUS)]:::pwr24
+BUS5[(+5V BUS)]:::pwr5
+GND[(GND BUS)]:::gnd
+
+PSU -->|"+24V"| BUS24
+PSU -->|"GND"| GND
+
+%% =====================
+%% DC-DC Conversion
+%% =====================
+Buck["DC-DC Buck<br/>24V → 5V"]:::pwr24
+
+BUS24 --> Buck
+GND --> Buck
+Buck -->|"+5V"| BUS5
+Buck -->|"GND"| GND
+
+%% =====================
+%% Control
+%% =====================
+Arduino["Arduino UNO"]:::ctrl
+
+BUS5 -->|"+5V"| Arduino
+GND -->|"GND"| Arduino
+
+%% =====================
+%% Motor Driver
+%% =====================
+BTS["BTS7960<br/>(Motor Driver)"]:::drv
+
+BUS24 -->|"B+"| BTS
+GND -->|"B- / GND"| BTS
+BUS5 -->|"Vcc (Logic 5V)"| BTS
+
+Arduino -->|"D9  RPWM"| BTS
+Arduino -->|"D10 LPWM"| BTS
+Arduino -->|"D7  R_EN"| BTS
+Arduino -->|"D8  L_EN"| BTS
+
+%% =====================
+%% Actuator
+%% =====================
+Motor["DC Motor<br/>(Reaction Wheel)"]:::act
+
+BTS -->|"M+"| Motor
+BTS -->|"M-"| Motor
+
+%% =====================
+%% Sensors
+%% =====================
+MEnc["Motor Encoder<br/>(Quadrature)"]:::sens
+SEnc["Shaft Encoder<br/>(NPN 360PPR)"]:::sens
+
+BUS5 -->|"+5V"| MEnc
+GND -->|"GND"| MEnc
+
+BUS5 -->|"+5V"| SEnc
+GND -->|"GND"| SEnc
+
+MEnc -->|"A (Am) → D2"| Arduino
+MEnc -->|"B (Bm) → D4"| Arduino
+
+SEnc -->|"A (As) → D3"| Arduino
+SEnc -->|"B (Bs) → D5"| Arduino
+
+%% =====================
+%% Link Colors
+%% =====================
+
+%% PSU → BUS
+linkStyle 0 stroke:#ff9800,stroke-width:3   %% 24V
+linkStyle 1 stroke:#000000,stroke-width:3   %% GND
+
+%% BUS → Buck
+linkStyle 2 stroke:#ff9800,stroke-width:3   %% 24V
+linkStyle 3 stroke:#000000,stroke-width:3   %% GND
+
+%% Buck → BUS
+linkStyle 4 stroke:#f44336,stroke-width:3   %% 5V
+linkStyle 5 stroke:#000000,stroke-width:3   %% GND
+
+%% BUS → Arduino
+linkStyle 6 stroke:#f44336,stroke-width:3   %% 5V
+linkStyle 7 stroke:#000000,stroke-width:3   %% GND
+
+%% BUS → BTS
+linkStyle 8 stroke:#ff9800,stroke-width:3   %% 24V
+linkStyle 9 stroke:#000000,stroke-width:3   %% GND
+linkStyle 10 stroke:#f44336,stroke-width:3  %% 5V
+
+%% Arduino → BTS (Signals)
+linkStyle 11 stroke:#2196f3,stroke-width:2
+linkStyle 12 stroke:#2196f3,stroke-width:2
+linkStyle 13 stroke:#2196f3,stroke-width:2
+linkStyle 14 stroke:#2196f3,stroke-width:2
+
+%% BTS → Motor
+linkStyle 15 stroke:#ff9800,stroke-width:3  %% Motor power
+linkStyle 16 stroke:#ff9800,stroke-width:3  %% Motor power
+
+%% BUS → Encoders
+linkStyle 17 stroke:#f44336,stroke-width:3  %% 5V
+linkStyle 18 stroke:#000000,stroke-width:3  %% GND
+linkStyle 19 stroke:#f44336,stroke-width:3  %% 5V
+linkStyle 20 stroke:#000000,stroke-width:3  %% GND
+
+%% Encoders → Arduino (Signals)
+linkStyle 21 stroke:#2196f3,stroke-width:2
+linkStyle 22 stroke:#2196f3,stroke-width:2
+linkStyle 23 stroke:#2196f3,stroke-width:2
+linkStyle 24 stroke:#2196f3,stroke-width:2
+
+
