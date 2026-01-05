@@ -32,3 +32,33 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# =========================
+# Arduino / Embedded project
+# =========================
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Compiled / build artifacts (just in case)
+*.o
+*.elf
+*.hex
+*.bin
+*.map
+
+# Serial logs / data dumps (optional)
+*.csv
+*.bag
+*.pcap
+*.log
+
+
+# If you add Python tooling later
+__pycache__/
+*.pyc
+.venv/
