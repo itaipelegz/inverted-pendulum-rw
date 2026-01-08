@@ -84,27 +84,11 @@ unsigned long lastEstMs = 0;
 long lastPCountSnap = 0;
 long lastMCountSnap = 0;
 
-// ------------------ Swing-up sign stability (anti-jitter) ------------------
-int p_vel_sign_latched = 0;          // remembers last "real" direction
-const float P_VEL_DEADBAND = 1.0f;   // rad/s, ignore sign flips inside this band 
-// Tuning guide:
-//   - If motor direction still jitters / flips rapidly:
-//       increase this value (e.g. 1.5f – 2.0f)
-//   - If swing-up feels too slow or unresponsive:
-//       decrease this value (e.g. 0.5f)
-
 // ------------------ Helpers ------------------
 int sgn(float x, float eps = 1e-4f) {
   if (x > eps) return +1;
   if (x < -eps) return -1;
   return 0;
-}
-
-int pendulumVelSignStable(float vel) {
-  // Updates latched sign only when |vel| is above deadband.
-  if (vel >  P_VEL_DEADBAND) p_vel_sign_latched = +1;
-  if (vel < -P_VEL_DEADBAND) p_vel_sign_latched = -1;
-  return p_vel_sign_latched; // holds last sign inside deadband
 }
 
 float wrapToPi(float a) {
@@ -195,17 +179,13 @@ void disableDriver() {
 // ------------------ PWM LIMIT (restriction #4) ------------------
 // This is the GLOBAL absolute PWM clamp for ANY command.
 // Set it low at first (e.g., 40-80) and raise carefully.
-const int PWM_LIMIT = 120;
+const int PWM_LIMIT = 180;
 
 // u in [-255, +255]
 void setMotorU(int u) {
-  // ---- GLOBAL motor direction fix (single point of truth) ----
-  u = -u;  // <--- flips the motor direction for ALL control modes
-
-  // ---- Global absolute PWM clamp ----
+  // Restriction #4: limit PWM HERE (single place affects everything)
   u = constrain(u, -PWM_LIMIT, PWM_LIMIT);
 
-  // ---- Drive BTS7960 ----
   if (u > 0) {
     analogWrite(RPWM_PIN, (uint8_t)u);
     analogWrite(LPWM_PIN, 0);
@@ -217,52 +197,6 @@ void setMotorU(int u) {
   }
 }
 
-// ------------------ Motor output smoothing (direction-safe ramp) ------------------
-//
-// Purpose:
-//   Prevent violent direction changes by:
-//   1) limiting PWM slew-rate (ramp)
-//   2) forcing a short zero-PWM dead-time before reversing direction
-//
-int u_applied = 0;                 // actually applied motor command
-const int PWM_STEP_PER_CTRL = 4;   // max PWM change per control step (4..15 typical)
-const int DIR_CHANGE_ZERO_HOLD_MS = 30; // ms to hold PWM=0 before reversing direction
-
-unsigned long dirChangeHoldUntilMs = 0;
-
-// Apply motor command with ramp + safe direction change
-//
-// This function MUST be used instead of calling setMotorU() directly
-void applyMotorWithRamp(int u_target) {
-  unsigned long now = millis();
-
-  // If we are inside a forced zero-PWM window (direction change dead-time)
-  if (now < dirChangeHoldUntilMs) {
-    u_applied = 0;
-    setMotorU(0);
-    return;
-  }
-
-  // Detect direction change request
-  if ((u_target > 0 && u_applied < 0) ||
-      (u_target < 0 && u_applied > 0)) {
-
-    // Force PWM = 0 briefly before reversing direction
-    u_applied = 0;
-    setMotorU(0);
-    dirChangeHoldUntilMs = now + DIR_CHANGE_ZERO_HOLD_MS;
-    return;
-  }
-
-  // Slew-rate limit (PWM ramp)
-  int diff = u_target - u_applied;
-  if (diff >  PWM_STEP_PER_CTRL) diff =  PWM_STEP_PER_CTRL;
-  if (diff < -PWM_STEP_PER_CTRL) diff = -PWM_STEP_PER_CTRL;
-
-  u_applied += diff;
-  setMotorU(u_applied);
-}
-
 // ------------------ Control (swing-up + stabilize) ------------------
 // We now have ZERO = DOWN.
 // Therefore "UP" is at angle ~ +/-PI.
@@ -271,7 +205,7 @@ void applyMotorWithRamp(int u_target) {
 const float THETA_STAB_RAD = 0.35f; // smaller = safer. start 0.25..0.5
 
 // Swing-up PWM magnitude (START LOW!)
-int PWM_SWING = 60;       // still here (restriction #4 clamps anyway)
+int PWM_SWING = 120;       // still here (restriction #4 clamps anyway)
 
 // PD stabilize near UP (START LOW!)
 float KP = 60.0f;
@@ -316,27 +250,12 @@ void setZeroAtUpUsingDownCalibration() {
   p_zeroOffset = rawDownCount - halfTurnCounts;
   interrupts();
 
-  // Reset estimator state safely (avoid velocity spike)
-  long pC_now = getPendulumCount();
-  long mC_now = getMotorCount();
-
-  lastPCountSnap = pC_now;
-  lastMCountSnap = mC_now;
-  lastEstMs = millis();
-
+  // Reset estimator state to avoid spikes
+  lastPCountSnap = 0;
   p_angle = PI;   // because we're currently DOWN
   p_vel = 0.0f;
-  m_vel = 0.0f;
 
-  // IMPORTANT: stop motion after calibration
-  paused = true;                 // require user to press 'g' again
-  allStopPWM();
-  u_applied = 0;                 // reset ramp state
-  dirChangeHoldUntilMs = 0;
-  p_vel_sign_latched = 0;        // reset swing-up sign latch
-
-  Serial.println("Calibrated at DOWN. Now p_angle=0 is UP (DOWN reads ~+PI). PAUSED (press 'g' to run).");
-
+  Serial.println("Calibrated at DOWN. Now p_angle=0 is UP (DOWN reads ~+PI).");
 }
 
 
@@ -412,17 +331,17 @@ int computeU() {
   bool nearUp = (fabs(up_err) < THETA_STAB_RAD);
 
   // CCW-only completion condition:
-  bool ccwSide = (p_angle > 0.0f);   // CCW approach side is the +angle branch
-  bool ccwVel  = (p_vel < 0.0f);    // CCW gives NEGATIVE velocity (measured)
+  bool ccwSide = (p_angle > 0.0f);   // near -PI branch (UP approached via negative wrap)
+  bool ccwVel  = (p_vel < 0.0f);     // CCW gives positive velocity in your convention
 
   if (nearUp && ccwSide && ccwVel) {
-    float u = -KP * up_err - KD * p_vel;
+    float u = KP * up_err + KD * p_vel;
     int ui = (int)lroundf(u);
     ui = constrain(ui, -PWM_MAX_STAB, PWM_MAX_STAB);
     return ui;
   }
 
-  int v = pendulumVelSignStable(p_vel);
+  int v = sgn(p_vel);
   if (v == 0) return 0;
   return -v * PWM_SWING;
 }
@@ -473,8 +392,7 @@ void loop() {
   unsigned long now = millis();
   if (now - lastCtrlMs >= CTRL_PERIOD_MS) {
     int u = computeU();
-    applyMotorWithRamp(u);
-    // setMotorU(u);
+    setMotorU(u);
     lastCtrlMs = now;
   }
 
