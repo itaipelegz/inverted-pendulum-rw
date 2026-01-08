@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/build.sh",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "upload",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/upload.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "monitor",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/monitor.sh",
+      "problemMatcher": []
+    }
+  ]
+}

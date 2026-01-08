@@ -42,6 +42,7 @@ google-services.json
 *.swp
 *.swo
 .vscode/
+!.vscode/
 !.vscode/tasks.json
 .idea/
 
