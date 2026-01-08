@@ -1,6 +1,6 @@
 #pragma once
 
-// Auto-generated from config/pendulum_config.json. Do not edit by hand.
+// Auto-generated from config/pendulum_config.yaml. Do not edit by hand.
 
 // Pins
 constexpr uint8_t RPWM_PIN = 9;

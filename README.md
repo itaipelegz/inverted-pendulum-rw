@@ -2,7 +2,7 @@
 Reaction-wheel inverted pendulum project using Arduino Uno.
 
 ## Repo layout
-- `config/` Source-of-truth configuration (JSON)
+- `config/` Source-of-truth configuration (YAML)
 - `include/` Generated headers (`generated_config.h`)
 - `python/` Configuration generator and tooling
 - `scripts/` Build/upload/monitor helpers
@@ -20,7 +20,7 @@ Requirements: `arduino-cli` with `arduino:avr:uno` installed.
 VS Code tasks are provided in `.vscode/tasks.json` and call these scripts.
 
 ## Changing configuration
-1) Edit `config/pendulum_config.json`
+1) Edit `config/pendulum_config.yaml`
 2) Rebuild with `scripts/build.sh`
 
 `python/generate_config.py` generates `include/generated_config.h`, and the firmware

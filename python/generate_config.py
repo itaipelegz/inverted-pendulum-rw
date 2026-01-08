@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import json
 import sys
 from pathlib import Path
 
+import yaml
 
 def fmt_float(value: float) -> str:
     # Preserve typical Arduino float literal with suffix.
@@ -16,7 +16,7 @@ def write_header(data, out_path: Path) -> None:
     lines = []
     lines.append("#pragma once")
     lines.append("")
-    lines.append("// Auto-generated from config/pendulum_config.json. Do not edit by hand.")
+    lines.append("// Auto-generated from config/pendulum_config.yaml. Do not edit by hand.")
     lines.append("")
 
     pins = data["pins"]
@@ -88,13 +88,13 @@ def write_header(data, out_path: Path) -> None:
 
 def main() -> int:
     if len(sys.argv) != 3:
-        print("Usage: generate_config.py <config.json> <output.h>")
+        print("Usage: generate_config.py <config.yaml> <output.h>")
         return 2
 
     config_path = Path(sys.argv[1])
     out_path = Path(sys.argv[2])
 
-    data = json.loads(config_path.read_text(encoding="utf-8"))
+    data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     write_header(data, out_path)
     return 0
 
