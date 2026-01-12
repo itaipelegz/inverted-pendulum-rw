@@ -89,7 +89,7 @@ void loop() {
 
   static unsigned long lastPrint = 0;
   if (now - lastPrint >= 200) {
-    printSnapshot("STREAM");
+    printSnapshot();
     lastPrint = now;
   }
 }

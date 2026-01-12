@@ -79,17 +79,19 @@ void printHelp() {
   Serial.println("Safety: full turn => ESTOP, and stabilize only if approaching UP from CCW.");
 }
 
-void printSnapshot(const char* tag) {
-  // Up error around PI (UP)
-  float up_err = p_angle;
+void printSnapshot() {
+  bool nearUp = (fabs(p_angle) < THETA_STAB_RAD);
+  const char* mode = nearUp ? "STAB" : "SWING";
 
-  Serial.print(tag);
+  Serial.print("t_ms="); Serial.print(millis());
+  // Serial.print(" | pC="); Serial.print(pC); // debug
+  // Serial.print(" | rawDelta="); Serial.print(rawDelta); // debug
+  Serial.print(" | mode="); Serial.print(mode);
   Serial.print(" | p_angle(rad)="); Serial.print(p_angle, 6);
   Serial.print(" | p_angle(deg)="); Serial.print(p_angle * RAD_TO_DEG, 2);
-  Serial.print(" | up_err(rad)="); Serial.print(up_err, 6);
   Serial.print(" | p_vel(rad/s)="); Serial.print(p_vel, 6);
   Serial.print(" | m_vel(rad/s)="); Serial.print(m_vel, 6);
-  Serial.print(" | PWM_LIMIT="); Serial.print(PWM_LIMIT);
+  Serial.print(" | PWM="); Serial.print(u_applied);
   Serial.print(" | state=");
   if (estop) Serial.println("ESTOP");
   else if (paused) Serial.println("PAUSED");
@@ -116,7 +118,7 @@ void handleSerial() {
       allStopPWM();
       Serial.println("ESTOP released. Still paused.");
     }
-    else if (c == 'p' || c == 'P') printSnapshot("PRINT");
+    else if (c == 'p' || c == 'P') printSnapshot();
     else if (c == '?') printHelp();
   }
 }
