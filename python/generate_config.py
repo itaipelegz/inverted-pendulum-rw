@@ -50,13 +50,14 @@ def write_header(data, out_path: Path) -> None:
     lines.append("")
 
     swing = data["swing"]
+    stab = data["stabilization"]
     lines.append("// Control (swing/stabilize)")
     lines.append(f"constexpr float P_VEL_DEADBAND = {fmt_float(swing['P_VEL_DEADBAND'])};")
-    lines.append(f"constexpr float THETA_STAB_RAD = {fmt_float(swing['THETA_STAB_RAD'])};")
-    lines.append(f"constexpr int PWM_SWING = {swing['PWM_SWING']};")
-    lines.append(f"constexpr float KP = {fmt_float(swing['KP'])};")
-    lines.append(f"constexpr float KD = {fmt_float(swing['KD'])};")
-    lines.append(f"constexpr int PWM_MAX_STAB = {swing['PWM_MAX_STAB']};")
+    lines.append(f"constexpr int PWM_MAX_SWING = {swing['PWM_MAX_SWING']};")
+    lines.append(f"constexpr float THETA_STAB_RAD = {fmt_float(stab['THETA_STAB_RAD'])};")
+    lines.append(f"constexpr float KP = {fmt_float(stab['KP'])};")
+    lines.append(f"constexpr float KD = {fmt_float(stab['KD'])};")
+    lines.append(f"constexpr int PWM_MAX_STAB = {stab['PWM_MAX_STAB']};")
     lines.append("")
 
     motor = data["motor"]

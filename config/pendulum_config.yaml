@@ -23,15 +23,17 @@ estimator:
 
 swing:
   P_VEL_DEADBAND: 1.0 # Deadband for pendulum velocity sign latch (rad/s)
-  THETA_STAB_RAD: 0.35 # Stabilization window around upright (rad)
-  PWM_SWING: 60 # Swing-up PWM magnitude
+  PWM_MAX_SWING: 120 # Swing-up PWM magnitude
+
+stabilization:
+  THETA_STAB_RAD: 0.35 # Stabilization window around upright (rad) ≈ 20.05°
   KP: 60.0 # Stabilization PD proportional gain
   KD: 8.0 # Stabilization PD derivative gain
   PWM_MAX_STAB: 120 # Max stabilize PWM before global clamp
 
 motor:
   PWM_LIMIT: 120 # Global PWM clamp
-  PWM_STEP_PER_CTRL: 4 # Max PWM change per control step
+  PWM_STEP_PER_CTRL: 8 # Max PWM change per control step
   DIR_CHANGE_ZERO_HOLD_MS: 30 # Zero-PWM hold before reversing direction (ms)
 
 control:
