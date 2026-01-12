@@ -56,7 +56,7 @@ void updateEstimates() {
   lastEstMs = now;
 }
 
-// Restriction #3: Swing-up should complete ONLY from CCW direction.
+// Restriction #3: Swing-up should complete ONLY from CCW direction (due to mechanical restriction).
 // Assumption: positive p_vel corresponds to CCW (if not, we can flip ISR sign).
 // We will allow "stabilize near UP" ONLY if:
 //   - close to UP (up_err small)
@@ -67,12 +67,23 @@ void updateEstimates() {
 int computeU() {
   float up_err = p_angle;
   bool nearUp = (fabs(up_err) < THETA_STAB_RAD);
+  // Latch entry to only evaluate CCW condition once per stability-zone entry.
+  static bool wasInStabZone = false;
+  bool enteringStabZone = nearUp && !wasInStabZone;
+  wasInStabZone = nearUp;
 
   // CCW-only completion condition:
   bool ccwSide = (p_angle > 0.0f);   // CCW approach side is the +angle branch
   bool ccwVel  = (p_vel < 0.0f);    // CCW gives NEGATIVE velocity (measured)
 
-  if (nearUp && ccwSide && ccwVel) {
+  if (enteringStabZone) {
+    Serial.print("STAB_ZONE_ENTER | ccwSide="); Serial.print(ccwSide);
+    Serial.print(" ccwVel="); Serial.print(ccwVel);
+    Serial.print(" p_angle="); Serial.print(p_angle, 6);
+    Serial.print(" p_vel="); Serial.println(p_vel, 6);
+  }
+
+  if (enteringStabZone && ccwSide && ccwVel) {
     float u = -KP * up_err - KD * p_vel;
     int ui = (int)lroundf(u);
     ui = constrain(ui, -PWM_MAX_STAB, PWM_MAX_STAB);
