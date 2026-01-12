@@ -28,13 +28,14 @@ constexpr float P_VEL_DEADBAND = 1.0f;
 constexpr int PWM_MAX_SWING = 120;
 constexpr float THETA_STAB_RAD = 0.35f;
 constexpr float KP = 60.0f;
-constexpr float KD = 8.0f;
+constexpr float KD = 12.0f;
+constexpr float KW = 1.0f;
 constexpr int PWM_MAX_STAB = 120;
 
 // Motor
 constexpr int PWM_LIMIT = 120;
 constexpr int PWM_STEP_PER_CTRL = 8;
-constexpr unsigned long DIR_CHANGE_ZERO_HOLD_MS = 30UL;
+constexpr unsigned long DIR_CHANGE_ZERO_HOLD_MS = 10UL;
 
 // Control loop
 constexpr unsigned long CTRL_PERIOD_MS = 20UL;

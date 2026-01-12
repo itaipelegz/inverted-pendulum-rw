@@ -76,15 +76,9 @@ int computeU() {
   bool ccwSide = (p_angle > 0.0f);   // CCW approach side is the +angle branch
   bool ccwVel  = (p_vel < 0.0f);    // CCW gives NEGATIVE velocity (measured)
 
-  if (enteringStabZone) {
-    Serial.print("STAB_ZONE_ENTER | ccwSide="); Serial.print(ccwSide);
-    Serial.print(" ccwVel="); Serial.print(ccwVel);
-    Serial.print(" p_angle="); Serial.print(p_angle, 6);
-    Serial.print(" p_vel="); Serial.println(p_vel, 6);
-  }
 
   if (enteringStabZone && ccwSide && ccwVel) {
-    float u = -KP * up_err - KD * p_vel;
+    float u = -KP * up_err - KD * p_vel - KW * m_vel;
     int ui = (int)lroundf(u);
     ui = constrain(ui, -PWM_MAX_STAB, PWM_MAX_STAB);
     return ui;
@@ -92,5 +86,5 @@ int computeU() {
 
   int v = pendulumVelSignStable(p_vel);
   if (v == 0) return 0;
-  return -v * PWM_SWING;
+  return -v * PWM_MAX_SWING;
 }
