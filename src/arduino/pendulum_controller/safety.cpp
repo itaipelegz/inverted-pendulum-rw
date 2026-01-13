@@ -28,16 +28,4 @@ void safetyChecks() {
     triggerEstop("Pendulum full turn detected (>= ~324deg since calibration)");
   }
 
-  // Restriction #4: entering the stability zone from CW direction -> stop immediately.
-  float up_err = p_angle;
-  bool nearUp = (fabs(up_err) < THETA_STAB_RAD);
-  static bool wasInStabZone = false;
-  bool enteringStabZone = nearUp && !wasInStabZone;
-  wasInStabZone = nearUp;
-
-  bool cwSide = (p_angle < 0.0f);   // CW approach side is the -angle branch
-  bool cwVel  = (p_vel > 0.0f);     // CW gives POSITIVE velocity (measured)
-  if (!fullTurnTripped && enteringStabZone && cwSide && cwVel) {
-    triggerEstop("Entered stability zone from CW direction");
-  }
 }
