@@ -65,6 +65,9 @@ void setup() {
   Serial.print("Motor CPR (1X) = "); Serial.println(MOTOR_COUNTS_PER_REV, 3);
   Serial.print("Shaft CPR = "); Serial.println(SHAFT_COUNTS_PER_REV, 1);
   Serial.print("PWM_LIMIT = "); Serial.println(PWM_LIMIT);
+  Serial.print("Kp = "); Serial.println(KP, 3);
+  Serial.print("Kd = "); Serial.println(KD, 3);
+  Serial.print("Kw = "); Serial.println(KW, 3);
   Serial.println("Start paused. Put pendulum DOWN, send 'z', then 'g'.");
   printHelp();
 }
