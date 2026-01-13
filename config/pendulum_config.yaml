@@ -26,7 +26,8 @@ swing:
   PWM_MAX_SWING: 120 # Swing-up PWM magnitude
 
 stabilization:
-  THETA_STAB_RAD: 0.35 # Stabilization window around upright (rad) ≈ 20.05°
+  THETA_STAB_RAD: 0.1745329 # Stabilization window around upright (rad) ≈ 10°
+  THETA_PAUSE_RAD: 0.3490659 # Pause window width (rad) ≈ 20°
   KP: 60.0 # Stabilization PD proportional gain
   KD: 12.0 # Stabilization PD derivative gain
   KW: 1.0 # Wheel-speed penalty gain

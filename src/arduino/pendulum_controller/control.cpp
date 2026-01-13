@@ -58,9 +58,17 @@ void updateEstimates() {
 
 int computeU() {
   float up_err = p_angle;
-  bool nearUp = (fabs(up_err) < THETA_STAB_RAD);
-  // Stabilize whenever near UP; otherwise use swing-up.
-  if (nearUp) {
+  bool inStab = (fabs(p_angle) <= THETA_STAB_RAD);
+  bool inPause = (p_angle >= (-THETA_STAB_RAD - THETA_PAUSE_RAD)) &&
+                 (p_angle <= (-THETA_STAB_RAD));
+
+  if (inPause) {
+    paused = true;
+    return 0;
+  }
+
+  // Stabilize inside the upright zone; otherwise use swing-up.
+  if (inStab) {
     float u = -KP * up_err - KD * p_vel - KW * m_vel;
     int ui = (int)lroundf(u);
     ui = constrain(ui, -PWM_MAX_STAB, PWM_MAX_STAB);

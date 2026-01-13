@@ -26,7 +26,8 @@ constexpr float M_VEL_ALPHA = 0.25f;
 // Control (swing/stabilize)
 constexpr float P_VEL_DEADBAND = 1.0f;
 constexpr int PWM_MAX_SWING = 120;
-constexpr float THETA_STAB_RAD = 0.35f;
+constexpr float THETA_STAB_RAD = 0.174533f;
+constexpr float THETA_PAUSE_RAD = 0.349066f;
 constexpr float KP = 60.0f;
 constexpr float KD = 12.0f;
 constexpr float KW = 1.0f;
