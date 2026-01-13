@@ -1,0 +1,47 @@
+# Source-of-truth configuration for the reaction-wheel pendulum.
+
+pins:
+  RPWM_PIN: 9   # BTS7960 RPWM output (~)
+  LPWM_PIN: 10  # BTS7960 LPWM output (~)
+  R_EN_PIN: 7   # BTS7960 R_EN
+  L_EN_PIN: 8   # BTS7960 L_EN
+  AM_PIN: 2     # Motor encoder A (INT0)
+  BM_PIN: 4     # Motor encoder B (direction)
+  AS_PIN: 3     # Shaft encoder A (INT1)
+  BS_PIN: 5     # Shaft encoder B (direction)
+
+encoder:
+  MOTOR_COUNTS_PER_REV_4X: 1717.9 # Measured motor counts per rev using 4X decoding
+  MOTOR_DECODE_FACTOR: 4.0 # Scale from 4X to 1X for the current ISR scheme
+  SHAFT_USE_CHANGE: false # Use CHANGE on shaft A interrupt (true) or RISING (false)
+  SHAFT_PPR: 360.0 # Shaft encoder pulses-per-revolution (1X)
+
+estimator:
+  EST_PERIOD_MS: 5 # Estimator update period in milliseconds
+  P_VEL_ALPHA: 0.25 # Low-pass filter alpha for pendulum velocity
+  M_VEL_ALPHA: 0.25 # Low-pass filter alpha for motor velocity
+
+swing:
+  P_VEL_DEADBAND: 1.0 # Deadband for pendulum velocity sign latch (rad/s)
+  PWM_MAX_SWING: 120 # Swing-up PWM magnitude
+
+stabilization:
+  THETA_STAB_RAD: 0.35 # Stabilization window around upright (rad) ≈ 20.05°
+  KP: 60.0 # Stabilization PD proportional gain
+  KD: 12.0 # Stabilization PD derivative gain
+  KW: 1.0 # Wheel-speed penalty gain
+  PWM_MAX_STAB: 120 # Max stabilize PWM before global clamp
+
+motor:
+  PWM_LIMIT: 120 # Global PWM clamp
+  PWM_STEP_PER_CTRL: 8 # Max PWM change per control step
+  DIR_CHANGE_ZERO_HOLD_MS: 10 # Zero-PWM hold before reversing direction (ms)
+
+control:
+  CTRL_PERIOD_MS: 20 # Control loop period in milliseconds
+
+serial:
+  BAUDRATE: 115200 # Serial baud rate
+
+safety:
+  FULL_TURN_THRESHOLD_FRACTION: 0.90 # Fraction of a full turn that triggers estop

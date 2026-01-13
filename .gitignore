@@ -42,6 +42,8 @@ google-services.json
 *.swp
 *.swo
 .vscode/
+!.vscode/
+!.vscode/tasks.json
 .idea/
 
 # Compiled / build artifacts (just in case)
@@ -50,6 +52,8 @@ google-services.json
 *.hex
 *.bin
 *.map
+.arduino_cache/
+.arduino_build/
 
 # Serial logs / data dumps (optional)
 *.csv
